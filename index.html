@@ -2,187 +2,78 @@
 <html lang="uk">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Jarvis UI — Neon Reactive (Optimized Mobile)</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Jarvis — Improved Mobile Reactive</title>
 <style>
   :root{
-    --bg:#070a12;
-    --fg:#e6f1ff;
-    --fg-dim:#9bb3d1;
-    --primary:#38bdf8;
-    --secondary:#a78bfa;
-    --accent:#22d3ee;
-    --danger:#ff5470;
-
-    --touch-size:56px;
-    --control-gap:12px;
-    --container-pad:20px;
-    --max-core:520px;
+    --bg:#070a12; --fg:#e6f1ff; --fg-dim:#9bb3d1;
+    --primary:#38bdf8; --accent:#22d3ee; --danger:#ff5470;
+    --control-size:56px; --gap:12px; --max-core:520px;
   }
 
-  /* Reset / base */
+  /* Basic reset */
   *{box-sizing:border-box}
-  html,body{height:100%}
+  html,body{height:100%; margin:0; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial; -webkit-font-smoothing:antialiased}
   body{
-    margin:0;
-    font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
     background: radial-gradient(1200px 800px at 50% 40%, #0d1322 0%, var(--bg) 60%, #05070c 100%);
-    color:var(--fg);
-    -webkit-font-smoothing:antialiased;
-    -moz-osx-font-smoothing:grayscale;
-    overflow:hidden;
-    -webkit-tap-highlight-color:transparent;
-  }
-
-  /* Backdrops (decorative) */
-  .backdrop{position:fixed; inset:0; pointer-events:none; z-index:0}
-  .backdrop .grid{
-    position:absolute; inset:-200vmax; opacity:.06; filter:contrast(120%);
-    background-image:
-      linear-gradient(to right, rgba(255,255,255,.06) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(255,255,255,.06) 1px, transparent 1px);
-    background-size: 56px 56px, 56px 56px;
-    mask-image: radial-gradient(70% 70% at 50% 50%, #000 10%, transparent 100%);
-  }
-  .noise{
-    position:fixed; inset:0; pointer-events:none; z-index:1; opacity:.03;
-    mix-blend-mode:soft-light;
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23n)"/></svg>');
+    color:var(--fg); overflow:hidden;
   }
 
   /* Layout */
-  .wrap{
-    position:relative; z-index:2;
-    height:100%; width:100%;
-    display:flex; align-items:center; justify-content:center;
-    padding:var(--container-pad);
-  }
+  .wrap{height:100%; display:flex; align-items:center; justify-content:center; padding:18px; position:relative}
+  .core{width:min(88vw,var(--max-core)); aspect-ratio:1/1; position:relative; display:grid; place-items:center; touch-action:none; -webkit-tap-highlight-color:transparent}
 
-  /* Core area */
-  .core{
-    position:relative; width:min(86vw,var(--max-core)); aspect-ratio:1/1;
-    display:grid; place-items:center; touch-action:none;
-    max-width:var(--max-core);
-  }
+  /* Decorative backdrops (subtle) */
+  .backdrop{position:fixed; inset:0; pointer-events:none; z-index:0}
+  .grid{position:absolute; inset:-200vmax; opacity:.06; background-image:
+    linear-gradient(to right, rgba(255,255,255,.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,.04) 1px, transparent 1px); background-size:48px 48px}
+  .noise{position:fixed; inset:0; opacity:.03; pointer-events:none; mix-blend-mode:soft-light; z-index:1;
+    background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140"><filter id="n"><feTurbulence baseFrequency="0.8" numOctaves="2" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23n)"/></svg>')}
 
-  /* Aura + rings + orb */
-  .aura{
-    position:absolute; inset:0; border-radius:50%;
-    filter: blur(36px) saturate(130%);
-    background:
-      conic-gradient(from 0deg,
-       rgba(56,189,248,.12),
-       rgba(167,139,250,.10),
-       rgba(34,211,238,.09),
-       rgba(56,189,248,.10));
-    pointer-events:none;
-    will-change:transform,opacity;
-  }
-  .rings{
-    position:absolute; inset:0; border-radius:50%; pointer-events:none;
-    mix-blend-mode:screen; opacity:0.7;
-    background:
-      radial-gradient(closest-side, rgba(56,189,248,.08), transparent 60%),
-      radial-gradient(closest-side, rgba(167,139,250,.06), transparent 58%);
-    will-change:transform,opacity;
-  }
-  .orb{
-    position:relative; width:70%; aspect-ratio:1/1; border-radius:50%;
-    background:
-      radial-gradient(circle at 50% 35%, rgba(255,255,255,.16), rgba(255,255,255,.02) 40%),
-      radial-gradient(circle at 50% 65%, rgba(34,211,238,.22), rgba(56,189,248,.12) 45%, rgba(167,139,250,.08) 70%);
-    box-shadow:
-      0 0 36px rgba(56,189,248,.22),
-      inset 0 0 48px rgba(167,139,250,.14);
-    transition: transform .18s cubic-bezier(.2,.9,.3,1);
-    display:grid; place-items:center;
-    will-change:transform;
-  }
-  .orb::before{
-    content:""; position:absolute; inset:12%; border-radius:50%;
-    border:1.6px solid rgba(168,189,255,.14);
-    box-shadow:0 0 20px rgba(56,189,248,.2), inset 0 0 36px rgba(56,189,248,.12);
-    mask: radial-gradient(circle at 50% 50%, transparent 55%, #000 56%);
-  }
+  /* Orb and rings */
+  .aura{position:absolute; inset:0; border-radius:50%; filter:blur(36px) saturate(130%); pointer-events:none; z-index:2;
+    background: conic-gradient(rgba(56,189,248,.10), rgba(167,139,250,.08), rgba(34,211,238,.08), rgba(56,189,248,.08))}
+  .rings{position:absolute; inset:0; border-radius:50%; pointer-events:none; z-index:3; mix-blend-mode:screen; opacity:.7;
+    background: radial-gradient(closest-side, rgba(56,189,248,.06), transparent 60%), radial-gradient(closest-side, rgba(167,139,250,.05), transparent 60%)}
+  .orb{position:relative; width:70%; aspect-ratio:1/1; border-radius:50%; z-index:4;
+      background:
+        radial-gradient(circle at 50% 35%, rgba(255,255,255,.14), rgba(255,255,255,.02) 40%),
+        radial-gradient(circle at 50% 65%, rgba(34,211,238,.20), rgba(56,189,248,.12));
+      box-shadow:0 0 36px rgba(56,189,248,.2), inset 0 0 44px rgba(167,139,250,.12);
+      transition:transform .18s cubic-bezier(.2,.9,.3,1); display:grid; place-items:center; overflow:visible}
 
-  /* particles container */
-  .field{
-    position:absolute; inset:-6vmin; border-radius:50%; pointer-events:none;
-    overflow:visible;
-  }
-  .particle{
-    position:absolute; border-radius:50%; pointer-events:none;
-    background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(56,189,248,0) 65%);
-    opacity:.85; will-change:transform,opacity;
-    filter:drop-shadow(0 0 6px rgba(56,189,248,.45));
-  }
+  .orb::before{content:""; position:absolute; inset:12%; border-radius:50%; border:1.4px solid rgba(168,189,255,.12); box-shadow:0 0 18px rgba(56,189,248,.16); mask: radial-gradient(circle at 50% 50%, transparent 55%, #000 56%)}
 
-  /* HUD (status) */
-  .hud{
-    position:absolute; inset:auto 0 -92px 0;
-    display:flex; flex-direction:column; align-items:center; gap:8px;
-    color:var(--fg-dim); text-align:center; z-index:3;
-    -webkit-user-select:none; user-select:none;
-  }
-  .title{ font-weight:700; letter-spacing:.12em; text-transform:uppercase; font-size:12px; color:#a6c5ff; opacity:.95; }
-  .status{ font-size:clamp(15px,3.2vw,20px); font-weight:600; color:var(--fg); text-shadow:0 0 10px rgba(56,189,248,.18); }
-  .hint{ font-size:13px; opacity:.8; max-width:86%; }
+  /* particles */
+  .field{position:absolute; inset:-6vmin; pointer-events:none; z-index:5}
+  .particle{position:absolute; border-radius:50%; pointer-events:none; background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(56,189,248,0) 70%); opacity:.85; filter:drop-shadow(0 0 6px rgba(56,189,248,.4))}
 
-  /* Controls — bottom center, larger touch targets on mobile */
-  .controls{
-    position:fixed; left:50%; bottom:20px; transform:translateX(-50%);
-    display:flex; gap:var(--control-gap); z-index:4; align-items:center;
-    padding:6px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    border-radius:16px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-    box-shadow: 0 8px 26px rgba(3,7,18,.6);
-  }
-  .btn{
-    display:inline-flex; align-items:center; justify-content:center;
-    min-width:var(--touch-size); height:var(--touch-size);
-    gap:8px; padding:10px 14px; border-radius:12px; border:0; outline:none;
-    font-weight:700; color:var(--fg); background:linear-gradient(180deg, rgba(56,189,248,.18), rgba(56,189,248,.10));
-    box-shadow: 0 10px 20px rgba(56,189,248,.14), inset 0 0 0 1px rgba(168,189,255,.08);
-    cursor:pointer; user-select:none;
-    transition:transform .12s ease, box-shadow .12s ease, opacity .12s ease;
-  }
-  .btn:active{ transform: translateY(1px); }
-  .btn:focus{ box-shadow: 0 0 0 4px rgba(56,189,248,.12); border-radius:12px; }
+  /* HUD and controls */
+  .hud{position:absolute; inset:auto 0 -92px 0; display:flex; flex-direction:column; align-items:center; gap:8px; z-index:6; text-align:center; color:var(--fg-dim)}
+  .title{font-weight:700; font-size:12px; color:#a6c5ff; letter-spacing:.12em; text-transform:uppercase}
+  .status{font-weight:700; font-size:clamp(15px,3.2vw,20px); color:var(--fg)}
+  .hint{font-size:13px; opacity:.85; max-width:86%}
 
-  .btn.secondary{
-    background:linear-gradient(180deg, rgba(167,139,250,.14), rgba(167,139,250,.08));
-    box-shadow: 0 10px 20px rgba(167,139,250,.12), inset 0 0 0 1px rgba(168,189,255,.06);
-  }
-  .btn.danger{
-    background:linear-gradient(180deg, rgba(255,84,112,.16), rgba(255,84,112,.06));
-    box-shadow: 0 10px 20px rgba(255,84,112,.12), inset 0 0 0 1px rgba(255,84,112,.06);
-  }
+  .controls{position:fixed; left:50%; bottom:18px; transform:translateX(-50%); display:flex; gap:var(--gap); z-index:8; padding:6px; border-radius:14px; background:rgba(255,255,255,0.02); backdrop-filter:blur(8px)}
+  button.btn{min-width:var(--control-size); height:var(--control-size); border-radius:12px; border:0; background:linear-gradient(180deg, rgba(56,189,248,.18), rgba(56,189,248,.10)); color:var(--fg); font-weight:700; display:inline-flex; align-items:center; justify-content:center; gap:8px; cursor:pointer; box-shadow:0 8px 18px rgba(3,7,18,.6); padding:10px}
+  .btn.secondary{background:linear-gradient(180deg, rgba(167,139,250,.12), rgba(167,139,250,.06))}
+  .btn.danger{background:linear-gradient(180deg, rgba(255,84,112,.14), rgba(255,84,112,.06))}
+  .btn:disabled{opacity:.5; cursor:not-allowed}
+  .visually-hidden{position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(1px,1px,1px,1px);white-space:nowrap}
 
-  .btn svg{ width:20px; height:20px; display:block; flex-shrink:0; }
+  /* canvas */
+  canvas#viz{position:absolute; inset:-12% -12% -12% -12%; width:124%; height:124%; pointer-events:none; z-index:1; filter:contrast(110%) saturate(110%)}
 
-  /* Accessibility hint (visually hidden) */
-  .visually-hidden{ position:absolute !important; height:1px; width:1px; overflow:hidden; clip:rect(1px,1px,1px,1px); white-space:nowrap; }
+  /* settings panel */
+  .settings{position:fixed; right:12px; top:12px; z-index:9; background:rgba(0,0,0,.28); padding:10px; border-radius:10px; backdrop-filter:blur(6px); color:var(--fg-dim); font-size:13px}
+  .settings label{display:flex; align-items:center; gap:8px}
+  input[type=range]{width:120px}
 
-  /* Canvas visuals */
-  canvas#viz{ position:absolute; inset:-10% -10% -10% -10%; width:120%; height:120%; pointer-events:none; filter:blur(.4px) saturate(110%) contrast(110%); }
+  @media (max-width:640px){ :root{--control-size:50px} .hud{inset:auto 0 -76px 0} .hint{display:none} .settings{right:8px; top:8px} }
 
-  /* Reduced motion */
   @media (prefers-reduced-motion: reduce){
-    .aura, .rings, .orb, .particle, canvas#viz{ transition:none !important; animation:none !important; will-change:auto !important; }
-  }
-
-  /* Mobile tweaks */
-  @media (max-width:640px){
-    :root{ --touch-size:48px; --container-pad:14px; --control-gap:10px; }
-    .hud{ inset:auto 0 -76px 0; }
-    .backdrop .grid{ background-size: 40px 40px, 40px 40px; opacity:.04; }
-    .orb{ width:78%; }
-  }
-
-  /* Very small screens */
-  @media (max-width:420px){
-    .hint{ display:none; }
-    .controls{ bottom:12px; padding:4px; }
+    .aura, .rings, .orb, .particle, canvas#viz{transition:none!important; animation:none!important}
   }
 </style>
 </head>
@@ -193,7 +84,6 @@
   <main class="wrap" aria-live="polite">
     <section class="core" id="core" role="application" aria-label="Jarvis core visual">
       <div class="aura" id="aura" aria-hidden="true"></div>
-
       <canvas id="viz" aria-hidden="true"></canvas>
       <div class="rings" id="rings" aria-hidden="true"></div>
 
@@ -202,53 +92,383 @@
       </div>
 
       <div class="hud" aria-hidden="false">
-        <div class="title">Проєкт «Jarvis» — візуальний інтерфейс</div>
-        <div class="status" id="status" aria-live="polite">Готовий. Натисніть «Почати».</div>
-        <div class="hint">Після дозволу на мікрофон говоріть — коло реагує на ваш голос.</div>
+        <div class="title">Проєкт «Jarvis»</div>
+        <div class="status" id="status">Готовий. Натисніть «Почати».</div>
+        <div class="hint" id="hint">Натисніть «Почати» → дозволіть мікрофон → говоріть. Якщо немає дозволу — увімкніть симуляцію.</div>
       </div>
     </section>
   </main>
 
-  <div class="controls" role="toolbar" aria-label="Керування Jarvis">
-    <button class="btn" id="btnStart" aria-pressed="false" title="Почати (пробіл/Enter)">
-      <!-- Play icon -->
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 3v18l15-9L5 3z" fill="currentColor"/></svg>
+  <div class="controls" role="toolbar" aria-label="Керування">
+    <button class="btn" id="btnStart" title="Почати">
+      ▶
       <span class="visually-hidden">Почати</span>
     </button>
-
-    <button class="btn secondary" id="btnMute" disabled aria-pressed="false" title="Заглушити / Увімкнути">
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M16.5 12a4.5 4.5 0 0 0-4.5-4.5v9A4.5 4.5 0 0 0 16.5 12zM5 9v6h4l5 4V5L9 9H5z" fill="currentColor"/></svg>
+    <button class="btn secondary" id="btnMute" disabled title="Заглушити">
+      🔇
       <span class="visually-hidden">Заглушити</span>
     </button>
-
     <button class="btn danger" id="btnStop" disabled title="Зупинити">
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/></svg>
+      ■
       <span class="visually-hidden">Зупинити</span>
     </button>
   </div>
 
+  <aside class="settings" aria-hidden="false">
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
+      <label style="font-weight:700;color:var(--fg)">Налаштування</label>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <label title="Чутливість">
+        Чутливість
+        <input id="sensitivity" type="range" min="0.6" max="4" step="0.1" value="2.6">
+      </label>
+      <label title="Згладжування">
+        Згладжування
+        <input id="smoothing" type="range" min="0" max="0.98" step="0.02" value="0.86">
+      </label>
+      <label>
+        <input id="particlesToggle" type="checkbox" checked> Частинки
+      </label>
+      <label>
+        <input id="simulateToggle" type="checkbox"> Симуляція (без мікрофона)
+      </label>
+    </div>
+  </aside>
+
 <script>
-/* ============================
-   Jarvis Reactive — Optimized
-   ============================ */
+/* Improved Jarvis — more robust handling, simulation fallback, debug-safe */
 (() => {
   // Elements
   const statusEl = document.getElementById('status');
+  const hintEl = document.getElementById('hint');
   const orb = document.getElementById('orb');
   const rings = document.getElementById('rings');
-  const core = document.getElementById('core');
   const field = document.getElementById('field');
+  const core = document.getElementById('core');
+  const canvas = document.getElementById('viz');
+  const ctx = canvas.getContext('2d', { alpha:true });
+
   const btnStart = document.getElementById('btnStart');
   const btnMute = document.getElementById('btnMute');
   const btnStop = document.getElementById('btnStop');
-  const canvas = document.getElementById('viz');
-  const ctx = canvas.getContext('2d', { alpha: true });
 
-  // Audio
+  const sensitivityInput = document.getElementById('sensitivity');
+  const smoothingInput = document.getElementById('smoothing');
+  const particlesToggle = document.getElementById('particlesToggle');
+  const simulateToggle = document.getElementById('simulateToggle');
+
+  // Audio/visual state
   let audioCtx = null, analyser = null, sourceNode = null, mediaStream = null;
-  let rafId = null, started = false, muted = false;
+  let rafId = null;
+  let started = false, muted = false;
+  let simulate = false;
+  let smoothingFactor = parseFloat(smoothingInput.value) || 0.86;
+  let sensitivity = parseFloat(sensitivityInput.value) || 2.6;
+  let levelSmoothed = 0;
 
-  // Visual state (avoid stacking transforms)
+  // Transform state (avoid concatenation)
+  let tx = 0, ty = 0, targetTx = 0, targetTy = 0;
+
+  // Resize canvas to element size (DPR aware)
+  function fitCanvas(){
+    const rect = core.getBoundingClientRect();
+    const ratio = window.devicePixelRatio || 1;
+    canvas.width = Math.max(1, Math.floor(rect.width * 1.28 * ratio));
+    canvas.height = Math.max(1, Math.floor(rect.height * 1.28 * ratio));
+  }
+
+  // Particle seeding adaptive
+  function particleCount(){
+    const w = window.innerWidth;
+    if(!particlesToggle.checked) return 0;
+    if(w < 420) return 10;
+    if(w < 640) return 18;
+    if(w < 900) return 28;
+    return 40;
+  }
+
+  function seedParticles(){
+    field.innerHTML = '';
+    const rect = field.getBoundingClientRect();
+    const cx = rect.width/2, cy = rect.height/2;
+    const cnt = particleCount();
+    for(let i=0;i<cnt;i++){
+      const d=document.createElement('div');
+      d.className='particle';
+      const angle=Math.random()*Math.PI*2;
+      const radius=(rect.width/2)*(0.68 + Math.random()*0.32);
+      const x = cx + Math.cos(angle)*radius;
+      const y = cy + Math.sin(angle)*radius;
+      const size = Math.round(3 + Math.random()*6);
+      d.style.left = `${x}px`; d.style.top = `${y}px`; d.style.width = d.style.height = `${size}px`;
+      d.style.opacity = (0.5 + Math.random()*0.5).toFixed(2);
+      field.appendChild(d);
+    }
+  }
+
+  // Debounced resize
+  let rTimer = null;
+  function handleResize(){
+    if(rTimer) clearTimeout(rTimer);
+    rTimer = setTimeout(()=>{ fitCanvas(); seedParticles(); }, 80);
+  }
+  window.addEventListener('resize', handleResize, { passive:true });
+
+  // Init visuals
+  fitCanvas();
+  seedParticles();
+
+  // Audio init in user gesture
+  async function initAudio(){
+    // HTTPS check
+    if(location.protocol !== 'https:' && location.hostname !== 'localhost'){
+      statusEl.textContent = 'Потрібен HTTPS або localhost для доступу до мікрофона.';
+      return false;
+    }
+
+    try {
+      // Request microphone
+      mediaStream = await navigator.mediaDevices.getUserMedia({ audio:{ echoCancellation:true, noiseSuppression:true }, video:false });
+
+      // Create AudioContext lazily (some browsers require user gesture)
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+
+      // create nodes
+      sourceNode = audioCtx.createMediaStreamSource(mediaStream);
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 1024;
+      analyser.smoothingTimeConstant = smoothingFactor;
+      sourceNode.connect(analyser);
+
+      // Resume if suspended (iOS/Chrome)
+      if(audioCtx.state === 'suspended'){
+        try { await audioCtx.resume(); } catch(e){ console.warn('resume failed', e); }
+      }
+
+      return true;
+    } catch (err) {
+      console.error('getUserMedia error', err);
+      statusEl.textContent = 'Помилка доступу до мікрофона: ' + (err && err.name ? err.name : String(err));
+      return false;
+    }
+  }
+
+  // Compute RMS level or return simulated idle
+  let timeDomain = null;
+  function measureLevel(){
+    if(simulate || !analyser){
+      // idle pulsation simulation when not listening
+      const t = performance.now() / 1000;
+      return 0.04 + Math.abs(Math.sin(t*1.8)) * 0.07;
+    }
+    if(!timeDomain || timeDomain.length !== analyser.fftSize) timeDomain = new Uint8Array(analyser.fftSize);
+    analyser.getByteTimeDomainData(timeDomain);
+    let sum=0;
+    for(let i=0;i<timeDomain.length;i++){
+      const v = (timeDomain[i] - 128) / 128;
+      sum += v*v;
+    }
+    return Math.sqrt(sum / timeDomain.length); // ~0..1 small values
+  }
+
+  // Frequency data (optional, for visuals)
+  let freqData = null;
+
+  // Animation loop
+  let last = performance.now();
+  function render(now){
+    rafId = requestAnimationFrame(render);
+    const dt = (now - last)/1000; last = now;
+
+    // smooth pointer translate interpolation
+    tx += (targetTx - tx) * Math.min(0.18, 8*dt);
+    ty += (targetTy - ty) * Math.min(0.18, 8*dt);
+
+    // level
+    const rawLevel = measureLevel();
+    const scaled = Math.min(1, rawLevel * (sensitivity)); // apply sensitivity
+    // smoothing to avoid jitter
+    levelSmoothed = (levelSmoothed * (1 - 0.12)) + (scaled * 0.12);
+
+    // apply transforms (no concatenation)
+    const scale = 1 + levelSmoothed * 0.08;
+    orb.style.transform = `translate(${Math.round(tx)}px, ${Math.round(ty)}px) scale(${scale})`;
+    rings.style.transform = `translate(${Math.round(tx*0.55)}px, ${Math.round(ty*0.55)}px) scale(${1 + levelSmoothed*0.14})`;
+    rings.style.opacity = String(0.58 + levelSmoothed * 0.42);
+
+    // draw canvas visuals (safe even if analyser missing)
+    const w = canvas.width, h = canvas.height, cx = w/2, cy = h/2;
+    ctx.clearRect(0,0,w,h);
+
+    // draw layered neon rings
+    const layers = 3;
+    for(let i=0;i<layers;i++){
+      const R = Math.min(w,h) * (0.18 + i*0.12 + levelSmoothed*0.03);
+      ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI*2);
+      ctx.lineWidth = 2 * (window.devicePixelRatio || 1);
+      const alpha = Math.max(0.02, 0.18 - i*0.03 + levelSmoothed*0.10);
+      ctx.strokeStyle = `rgba(${160+i*18}, ${220-i*18}, 255, ${alpha})`;
+      ctx.shadowColor = 'rgba(56,189,248,0.35)';
+      ctx.shadowBlur = 12 * (window.devicePixelRatio || 1);
+      ctx.stroke();
+    }
+
+    // dynamic low-poly fill
+    if(analyser && !simulate){
+      if(!freqData || freqData.length !== analyser.frequencyBinCount) freqData = new Uint8Array(analyser.frequencyBinCount);
+      analyser.getByteFrequencyData(freqData);
+    }
+    const bins = 36;
+    const baseR = Math.min(w,h) * (0.22 + levelSmoothed*0.04);
+    ctx.beginPath();
+    for(let i=0;i<bins;i++){
+      const a = (i/bins)*Math.PI*2 + now*0.0006;
+      const mag = (analyser && freqData) ? ((freqData[i]||0)/255) : 0;
+      const r = baseR + (mag * 34 * (window.devicePixelRatio || 1));
+      const x = cx + Math.cos(a)*r, y = cy + Math.sin(a)*r;
+      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.closePath();
+    ctx.fillStyle = `rgba(56,189,248, ${0.06 + levelSmoothed*0.12})`;
+    ctx.fill();
+
+    // soft glow
+    const glowR = baseR + 44*(window.devicePixelRatio || 1) + levelSmoothed*46*(window.devicePixelRatio || 1);
+    const grad = ctx.createRadialGradient(cx,cy,baseR*0.28,cx,cy,glowR);
+    grad.addColorStop(0, `rgba(167,139,250, ${0.08 + levelSmoothed*0.14})`);
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath(); ctx.arc(cx,cy,glowR,0,Math.PI*2); ctx.fill();
+
+    // small dots
+    const dots = 10;
+    for(let i=0;i<dots;i++){
+      const a = (i/dots)*Math.PI*2 + now*0.0008*(1+i*0.02);
+      const r = baseR + 20*(window.devicePixelRatio||1) + Math.sin(now*0.002 + i)*4*(window.devicePixelRatio||1) + levelSmoothed*8*(window.devicePixelRatio||1);
+      const x = cx + Math.cos(a)*r, y = cy + Math.sin(a)*r;
+      ctx.beginPath();
+      ctx.arc(x,y, 2.0*(window.devicePixelRatio||1) + levelSmoothed*1.2, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(255,255,255, ${0.64 + Math.sin(now*0.004+i)*0.18})`;
+      ctx.shadowColor = 'rgba(56,189,248,0.48)';
+      ctx.shadowBlur = 10*(window.devicePixelRatio||1);
+      ctx.fill();
+    }
+  }
+
+  // Controls: start/stop/mute
+  btnStart.addEventListener('click', async () => {
+    // If already started and audio context suspended -> try resume
+    btnStart.disabled = true;
+    statusEl.textContent = 'Починаємо...';
+    simulate = simulateToggle.checked;
+
+    if(!simulate){
+      const ok = await initAudio();
+      if(!ok){
+        // enable simulate fallback
+        statusEl.textContent = 'Не вдалося отримати мікрофон — увімкніть "Симуляція" або дайте дозвіл.';
+        btnStart.disabled = false;
+        return;
+      }
+    } else {
+      // simulation mode (no mic)
+      if(audioCtx && audioCtx.state === 'suspended'){
+        try { await audioCtx.resume(); } catch(e){ /* ignore */ }
+      }
+    }
+
+    started = true;
+    muted = false;
+    btnMute.disabled = false; btnStop.disabled = false;
+    btnStart.disabled = true;
+    statusEl.textContent = simulate ? 'Симуляція: візуалізація активна.' : 'Слухаю… Говоріть.';
+    startRendering();
+  });
+
+  btnMute.addEventListener('click', () => {
+    if(!started) return;
+    muted = !muted;
+    btnMute.textContent = muted ? '🔈' : '🔇';
+    statusEl.textContent = muted ? 'Мікрофон заглушено.' : (simulate ? 'Симуляція: візуалізація активна.' : 'Слухаю… Говоріть.');
+  });
+
+  btnStop.addEventListener('click', () => {
+    stopEverything();
+  });
+
+  // Start RAF
+  function startRendering(){
+    if(rafId) cancelAnimationFrame(rafId);
+    // set smoother analyser smoothing value to current config
+    if(analyser) analyser.smoothingTimeConstant = smoothingFactor;
+    last = performance.now();
+    rafId = requestAnimationFrame(render);
+  }
+
+  // Stop audio + visuals
+  function stopEverything(){
+    // stop stream tracks
+    try {
+      if(mediaStream) mediaStream.getTracks().forEach(t => t.stop());
+    } catch(e){ console.warn(e); }
+    mediaStream = null;
+    try{ if(sourceNode) sourceNode.disconnect(); } catch(e){}
+    sourceNode = null;
+    try{ if(analyser) analyser.disconnect(); } catch(e){}
+    analyser = null;
+    try{ if(audioCtx) audioCtx.close(); } catch(e){}
+    audioCtx = null;
+
+    if(rafId) cancelAnimationFrame(rafId);
+    rafId = null;
+    started = false; muted = false;
+    btnStart.disabled = false; btnMute.disabled = true; btnStop.disabled = true;
+    statusEl.textContent = 'Зупинено. Натисніть «Почати».';
+    // visual reset
+    orb.style.transform = `translate(0px, 0px) scale(1)`;
+    rings.style.transform = `translate(0px, 0px) scale(1)`;
+    rings.style.opacity = '0.6';
+  }
+
+  // Pointer parallax (throttled)
+  let lastPointer = 0;
+  window.addEventListener('pointermove', (e) => {
+    const now = performance.now();
+    if(now - lastPointer < 12) return;
+    lastPointer = now;
+    const r = core.getBoundingClientRect();
+    const x = (e.clientX - (r.left + r.width/2)) / r.width;
+    const y = (e.clientY - (r.top + r.height/2)) / r.height;
+    const sensitivityPx = Math.max(6, r.width * 0.02);
+    targetTx = x * sensitivityPx;
+    targetTy = y * sensitivityPx;
+  }, { passive:true });
+
+  // keyboard accessibility: space / enter starts
+  window.addEventListener('keydown', (e) => {
+    if(e.key === ' ' || e.key === 'Enter'){
+      const tag = document.activeElement && document.activeElement.tagName;
+      if(tag !== 'INPUT' && tag !== 'TEXTAREA'){
+        e.preventDefault();
+        if(!started) btnStart.click();
+      }
+    }
+  }, { passive:false });
+
+  // settings handlers
+  sensitivityInput.addEventListener('input', (e) => {
+    sensitivity = parseFloat(e.target.value) || 2.6;
+  });
+  smoothingInput.addEventListener('input', (e) => {
+    smoothingFactor = parseFloat(e.target.value) || 0.86;
+    if(analyser) analyser.smoothingTimeConstant = smoothingFactor;
+  });
+  particlesToggle.addEventListener('change', seedParticles);
+  simulateToggle.addEventListener('change', (e) => {
+    simulate = e.target.checked;
+    if(simulate){
+      // if currentg transforms)
   let baseScale = 1;
   let translateX = 0, translateY = 0;
 
